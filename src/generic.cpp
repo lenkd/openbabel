@@ -1762,9 +1762,25 @@ void OBOrcaSpecData::SetEmM2(const std::vector<double> & vEmM2)
 */
 void OBOrcaSpecData::SetEmQ2(const std::vector<double> & vEmQ2)
 {
-  this->_vEmQ2 = vEmQ2;
+    this->_vEmQ2 = vEmQ2;
+}
+/*!
+**\brief OBOrcaNearIRData::SetNearIRData
+**\param bOrcaNearIRData true or false
+*/
+void OBOrcaNearIRData::SetNearIRData(const bool & bOrcaNearIRData)
+{
+    this->_bOrcaNearIRData = bOrcaNearIRData;
 }
 
+void OBOrcaNearIRData::SetFrequencies(const std::vector<double> & vFrequencies)
+{
+    this->_vNearIRFrequencies = vFrequencies;
+}
+void OBOrcaNearIRData::SetIntensities(const std::vector<double> & vIntensities)
+{
+    this->_vNearIRIntensities = vIntensities;
+}
 
 } //end namespace OpenBabel
 

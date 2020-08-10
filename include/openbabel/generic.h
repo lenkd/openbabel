@@ -1282,9 +1282,43 @@ namespace OpenBabel
       { return this->_vEmQ2; }
   };
 
+  //! \class OBOrcaNearIRData generic.h <openbabel/generic.h>
+  //! \brief Used to hold information about overtones and combination bands calculated by Orca
+  class OBAPI OBOrcaNearIRData: public OBGenericData
+  {
+  protected:
+    bool _bOrcaNearIRData;
+    //! NearIR Frequencies (cm**-1)
+    std::vector<double>  _vNearIRFrequencies;
 
- //! A standard iterator over vectors of OBGenericData (e.g., inherited from OBBase)
-  typedef std::vector<OBGenericData*>::iterator OBDataIterator;
+    //! Intensities (eps in L/(mol*cm) )
+    std::vector<double>  _vNearIRIntensities;
+
+
+  public:
+    OBOrcaNearIRData(): OBGenericData("OrcaNearIRSpectraData", OBGenericDataType::CustomData1) {}
+    virtual ~OBOrcaNearIRData() {}
+    virtual OBGenericData* Clone(OBBase*) const
+         {return new OBOrcaNearIRData(*this);}
+
+    OBOrcaNearIRData & operator=(const OBOrcaNearIRData &);
+
+    void SetNearIRData (const bool &bOrcaNearIRData);
+    void SetFrequencies(const std::vector<double> &);
+    void SetIntensities(const std::vector<double> &);
+
+
+    bool GetNearIRData () const
+    { return this->_bOrcaNearIRData; }
+    std::vector<double> GetFrequencies() const
+      { return this->_vNearIRFrequencies; }
+    std::vector<double> GetIntensities() const
+      { return this->_vNearIRIntensities; }
+  };
+
+  //! A standard iterator over vectors of OBGenericData (e.g., inherited from OBBase)
+  //!
+   typedef std::vector<OBGenericData*>::iterator OBDataIterator;
 
 } //end namespace OpenBabel
 

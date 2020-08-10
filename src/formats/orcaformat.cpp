@@ -132,6 +132,8 @@ namespace OpenBabel
     double skipFreq = 0;
     std::vector< std::vector< vector3 > > Lx;
     std::vector<double> Frequencies, Intensities, RamanActivities;
+    std::vector<double> NearIRFrequencies, NearIRIntensities;
+    bool NearIRDatafound = false;
     // UV data
     std::vector<double> UVWavenumber, UVWavelength, UVForces, UVEDipole;
     // CD data
@@ -497,13 +499,19 @@ namespace OpenBabel
 // IR spectrum
 //
         if (checkKeywords.find("IR SPECTRUM") != notFound) {
+
             Frequencies.resize(0);
             Intensities.resize(0);
 
             ifs.getline(buffer, BUFF_SIZE); // skip ---------------------
             ifs.getline(buffer, BUFF_SIZE); // skip empty line
             ifs.getline(buffer, BUFF_SIZE); // skip header
-            ifs.getline(buffer, BUFF_SIZE); // skip ---------------------
+            ifs.getline(buffer, BUFF_SIZE);
+
+            tokenize(vs,buffer);
+            if (vs.size() > 1) {    // skip unit line if any
+              ifs.getline(buffer,BUFF_SIZE);    // skip ---------------------
+            }
             ifs.getline(buffer, BUFF_SIZE);
             str = checkChar (string(buffer), ':');  // remove ":" for correct parsing
             str = checkChar (str, '(');  // remove "(" for correct parsing
@@ -518,6 +526,37 @@ namespace OpenBabel
                 tokenize(vs,str);
             }
         } // if "IR SPECTRUM"
+//
+// Overtones and combined bands
+//
+        if (checkKeywords.find("OVERTONES AND COMBINATION BANDS") != notFound) {
+            NearIRDatafound = true;
+            NearIRFrequencies.resize(0);
+            NearIRIntensities.resize(0);
+
+            ifs.getline(buffer, BUFF_SIZE); // skip ---------------------
+            ifs.getline(buffer, BUFF_SIZE); // skip empty line
+            ifs.getline(buffer, BUFF_SIZE); // skip header
+            ifs.getline(buffer, BUFF_SIZE);
+
+            tokenize(vs,buffer);
+            if (vs.size() > 1) {    // skip unit line if any
+                ifs.getline(buffer,BUFF_SIZE);    // skip ---------------------
+            }
+            ifs.getline(buffer, BUFF_SIZE);
+            str = checkChar (string(buffer), ':');  // remove ":" for correct parsing
+            str = checkChar (str, '(');  // remove "(" for correct parsing
+            tokenize(vs,str);
+
+            while (vs.size() >= 6) {
+                NearIRFrequencies.push_back(atof(vs[2].c_str()));
+                NearIRIntensities.push_back(atof(vs[3].c_str()));
+                ifs.getline(buffer, BUFF_SIZE);
+                str = checkChar (string(buffer), ':');  // remove ":" for correct parsing
+                str = checkChar (str, '(');  // remove "(" for correct parsing
+                tokenize(vs,str);
+            }
+        } // if "OVERTONES AND COMBINATION BANDS"
 //
 // RAMAN spectrum
 //
@@ -936,7 +975,14 @@ namespace OpenBabel
         orcaSpec->SetOrigin(fileformatInput);
         mol.SetData(orcaSpec);
     }
-
+    if (NearIRDatafound) {
+        OBOrcaNearIRData* nearIRData = new OBOrcaNearIRData;
+        nearIRData->SetFrequencies(NearIRFrequencies);
+        nearIRData->SetIntensities(NearIRIntensities);
+        nearIRData->SetNearIRData(NearIRDatafound);
+        nearIRData->SetOrigin(fileformatInput);
+        mol.SetData(nearIRData);
+    }
     if(UVWavelength.size() > 0 || CDWavelength.size() > 0)
     {
         OBElectronicTransitionData* etd = new OBElectronicTransitionData;
@@ -972,6 +1018,7 @@ namespace OpenBabel
     if (hasPartialCharges)
       mol.SetPartialChargesPerceived();
     mol.SetTitle(title);
+
     return(true);
   }
 
